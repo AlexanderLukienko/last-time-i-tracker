@@ -26,12 +26,13 @@ document.addEventListener('DOMContentLoaded', () => {
       // Calculate days elapsed
       const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-      // Calculate hours and minutes elapsed
-      const diffTotalMinutes = Math.floor(diffTime / (1000 * 60));
-      const hours = Math.floor(diffTotalMinutes / 60);
-      const minutes = diffTotalMinutes % 60;
-      // Format HH:MM (with leading zeros)
-      const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+      // Calculate total seconds elapsed
+const diffTotalSeconds = Math.floor(diffTime / 1000);
+const hours = Math.floor(diffTotalSeconds / 3600);
+const minutes = Math.floor((diffTotalSeconds % 3600) / 60);
+const seconds = diffTotalSeconds % 60;
+// Format HH:MM:SS (with leading zeros)
+const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
       taskItem.innerHTML = `
         <h3>${task.name}</h3>
@@ -48,21 +49,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Function to update only the timer elements live
   function updateTimers() {
-    const timerElements = document.querySelectorAll('.timer');
-    timerElements.forEach(timerEl => {
-      const index = timerEl.getAttribute('data-index');
-      const task = tasks[index];
-      if (!task) return;
-      const lastDoneDate = new Date(task.lastDone);
-      const now = new Date();
-      const diffTime = now - lastDoneDate;
-      const diffTotalMinutes = Math.floor(diffTime / (1000 * 60));
-      const hours = Math.floor(diffTotalMinutes / 60);
-      const minutes = diffTotalMinutes % 60;
-      const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-      timerEl.textContent = formattedTime;
-    });
-  }
+  const timerElements = document.querySelectorAll('.timer');
+  timerElements.forEach(timerEl => {
+    const index = timerEl.getAttribute('data-index');
+    const task = tasks[index];
+    if (!task) return;
+    const lastDoneDate = new Date(task.lastDone);
+    const now = new Date();
+    const diffTime = now - lastDoneDate;
+    const diffTotalSeconds = Math.floor(diffTime / 1000);
+    const hours = Math.floor(diffTotalSeconds / 3600);
+    const minutes = Math.floor((diffTotalSeconds % 3600) / 60);
+    const seconds = diffTotalSeconds % 60;
+    const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    timerEl.textContent = formattedTime;
+  });
+}
 
   // Handle new task creation
   saveTaskButton.addEventListener('click', () => {
