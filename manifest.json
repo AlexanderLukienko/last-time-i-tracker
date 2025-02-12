@@ -1,7 +1,7 @@
 {
   "short_name": "LastTimeI",
   "name": "Last Time I Tracker",
-  "start_url": "/alexanderlukienko.github.io/last-time-i-tracker/",
+  "start_url": "/last-time-i-tracker/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#317EFB",
