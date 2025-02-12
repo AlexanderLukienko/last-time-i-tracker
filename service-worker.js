@@ -1,4 +1,4 @@
-const CACHE_NAME = 'last-time-i-cache-v1';
+const CACHE_NAME = 'last-time-i-cache-v2';
 const urlsToCache = [
   '/',
   '/index.html',

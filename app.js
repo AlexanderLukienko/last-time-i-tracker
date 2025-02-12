@@ -56,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Handle "Did It Again" button click to reset timer
   taskListContainer.addEventListener('click', (e) => {
     if (e.target.classList.contains('didItAgain')) {
+      console.log('Did It Again button clicked, index:', e.target.getAttribute('data-index'));
       const index = e.target.getAttribute('data-index');
       tasks[index].lastDone = new Date().toISOString();
       saveTasksToLocalStorage();
