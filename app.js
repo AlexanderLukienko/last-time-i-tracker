@@ -77,15 +77,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Function to send a notification for a given task
   function sendNotification(task) {
-    if (Notification.permission === "granted") {
-      new Notification("Time's Up!", {
-        body: `It's been ${(task.interval * ((task.notifiedCount || 0) + 1))} day(s) since you did: ${task.name}`,
-        icon: './icon-192x192.png'
-      });
+  if (Notification.permission === "granted") {
+    // Determine the interval text based on unit
+    let intervalText;
+    if (task.unit === "minute") {
+      intervalText = `${task.interval * ((task.notifiedCount || 0) + 1)} minute(s)`;
     } else {
-      console.log("Notification permission not granted.");
+      intervalText = `${task.interval * ((task.notifiedCount || 0) + 1)} day(s)`;
     }
+
+    new Notification("Time's Up!", {
+      body: `It's been ${intervalText} since you did: ${task.name}`,
+      icon: './icon-192x192.png'
+    });
+  } else {
+    console.log("Notification permission not granted.");
   }
+}
 
   // Function to check if tasks are overdue and send notifications
   function checkReminders() {
@@ -107,7 +115,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const intervalsPassed = Math.floor(diffTime / reminderMillis);
     const notifiedCount = task.notifiedCount || 0;
 
+    console.log(`Task "${task.name}" - intervalsPassed: ${intervalsPassed}, notifiedCount: ${notifiedCount}`);
+
     if (intervalsPassed > notifiedCount) {
+      console.log(`Sending notification for task "${task.name}"`);
       sendNotification(task);
       // Update notifiedCount so that a notification is sent only once per interval passage
       task.notifiedCount = intervalsPassed;
@@ -161,5 +172,5 @@ saveTaskButton.addEventListener('click', () => {
   setInterval(updateTimers, 1000);
 
   // Check reminders every minute (adjust as needed)
-  setInterval(checkReminders, 60000);
+  setInterval(checkReminders, 5000);
 });
