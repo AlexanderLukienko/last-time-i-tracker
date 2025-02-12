@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Last Time I Tracker</title>
+  <!-- Link to the manifest for PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <style>
+    /* Basic styling */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+    }
+    input, select, button {
+      padding: 0.5rem;
+      margin-right: 0.5rem;
+      font-size: 1rem;
+    }
+    .task-list {
+      margin-top: 1rem;
+    }
+    .task-item {
+      margin-bottom: 1rem;
+      padding: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Last Time I Tracker</h1>
+  <div>
+    <input type="text" id="eventName" placeholder="Enter event name" />
+    <select id="reminderInterval">
+      <!-- Values here are in days -->
+      <option value="1">1 day</option>
+      <option value="7">1 week</option>
+      <option value="30">1 month</option>
+    </select>
+    <button id="saveTask">Save Task</button>
+  </div>
+  <div class="task-list" id="taskList">
+    <!-- Tracked tasks will appear here -->
+  </div>
+
+  <!-- Link to our JavaScript file -->
+  <script src="app.js"></script>
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+          .then(registration => {
+            console.log('Service Worker registered with scope:', registration.scope);
+          })
+          .catch(error => {
+            console.error('Service Worker registration failed:', error);
+          });
+      });
+    }
+  </script>
+</body>
+</html>
