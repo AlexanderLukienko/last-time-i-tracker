@@ -89,48 +89,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Function to check if tasks are overdue and send notifications
   function checkReminders() {
-    tasks.forEach((task, index) => {
-      // Convert the reminder interval (in days) to milliseconds
-      const reminderMillis = task.interval * 24 * 60 * 60 * 1000;
-      const lastDone = new Date(task.lastDone);
-      const now = new Date();
-      const diffTime = now - lastDone;
-
-      // Calculate how many full intervals have passed
-      const intervalsPassed = Math.floor(diffTime / reminderMillis);
-      // Use notifiedCount to track how many notifications have already been sent for this task
-      const notifiedCount = task.notifiedCount || 0;
-
-      if (intervalsPassed > notifiedCount) {
-        // Send a notification (you can choose to send one notification per new interval)
-        sendNotification(task);
-        // Update the task's notifiedCount property
-        task.notifiedCount = intervalsPassed;
-        saveTasksToLocalStorage();
-      }
-    });
-  }
-
-  // Handle new task creation
-  saveTaskButton.addEventListener('click', () => {
-    const name = eventNameInput.value.trim();
-    if (!name) {
-      return alert('Please enter an event name.');
+  tasks.forEach((task, index) => {
+    let reminderMillis;
+    if (task.unit === 'minute') {
+      // Convert minutes to milliseconds
+      reminderMillis = task.interval * 60 * 1000;
+    } else {
+      // Assume 'day' unit (or extend with other units as needed)
+      reminderMillis = task.interval * 24 * 60 * 60 * 1000;
     }
 
-    const interval = parseInt(reminderIntervalSelect.value, 10);
-    const task = {
-      name,
-      interval,
-      lastDone: new Date().toISOString(),
-      notifiedCount: 0  // Initialize notifications count
-    };
+    const lastDone = new Date(task.lastDone);
+    const now = new Date();
+    const diffTime = now - lastDone;
 
-    tasks.push(task);
-    saveTasksToLocalStorage();
-    renderTasks();
-    eventNameInput.value = ''; // Clear input field
+    // Calculate how many full intervals have passed
+    const intervalsPassed = Math.floor(diffTime / reminderMillis);
+    const notifiedCount = task.notifiedCount || 0;
+
+    if (intervalsPassed > notifiedCount) {
+      sendNotification(task);
+      // Update notifiedCount so that a notification is sent only once per interval passage
+      task.notifiedCount = intervalsPassed;
+      saveTasksToLocalStorage();
+    }
   });
+}
+
+  // Handle new task creation
+saveTaskButton.addEventListener('click', () => {
+  const name = eventNameInput.value.trim();
+  if (!name) {
+    return alert('Please enter an event name.');
+  }
+
+  // Get the selected option and its unit
+  const selectedOption = reminderIntervalSelect.options[reminderIntervalSelect.selectedIndex];
+  const unit = selectedOption.getAttribute('data-unit'); // "day" or "minute"
+  const interval = parseFloat(selectedOption.value); // use parseFloat in case you have fractional values in the future
+
+  const task = {
+    name,
+    interval,
+    unit,
+    lastDone: new Date().toISOString(),
+    notifiedCount: 0  // Initialize notification counter
+  };
+
+  tasks.push(task);
+  saveTasksToLocalStorage();
+  renderTasks();
+  eventNameInput.value = ''; // Clear input field
+});
 
   // Handle "Did It Again" button click to reset timer
   taskListContainer.addEventListener('click', (e) => {
