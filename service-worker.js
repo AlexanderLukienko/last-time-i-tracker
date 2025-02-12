@@ -1,10 +1,11 @@
-const CACHE_NAME = 'last-time-i-cache-v2';
+const CACHE_NAME = 'last-time-i-cache-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/app.js',
-  '/manifest.json',
-  // Include any other assets (e.g., CSS files, images) here
+  './',                   // Relative path to the root of your repository folder
+  './index.html',
+  './app.js',
+  './manifest.json',
+  './icon-192x192.png',
+  './icon-512x512.png'
 ];
 
 self.addEventListener('install', event => {
