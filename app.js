@@ -144,4 +144,3 @@ document.addEventListener("DOMContentLoaded", () => {
   renderTasks();
   setInterval(updateTimers, 1000);
   setInterval(checkReminders, 10000); // Check reminders every minute (instead of 5 sec)
-};
