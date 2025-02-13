@@ -4,24 +4,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const saveTaskButton = document.getElementById('saveTask');
   const taskListContainer = document.getElementById('taskList');
 
-  // Load tasks from localStorage or initialize as an empty array
   let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
 
-  // Save tasks back to localStorage
   function saveTasksToLocalStorage() {
     localStorage.setItem('tasks', JSON.stringify(tasks));
   }
 
-  // Request notification permission (if not already granted)
   if (Notification.permission !== 'granted') {
     Notification.requestPermission().then(permission => {
       if (permission === 'granted') {
-        console.log("Notification permission granted.");
+        console.log("Notifications enabled.");
       }
     });
   }
 
-  // Render all tasks (with a dedicated timer element)
   function renderTasks() {
     taskListContainer.innerHTML = '';
     tasks.forEach((task, index) => {
@@ -30,17 +26,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const lastDoneDate = new Date(task.lastDone);
       const now = new Date();
-      const diffTime = now - lastDoneDate; // Difference in milliseconds
-
-      // Calculate days elapsed
+      const diffTime = now - lastDoneDate;
       const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-      // Calculate total seconds elapsed, then derive hours, minutes, and seconds
       const diffTotalSeconds = Math.floor(diffTime / 1000);
       const hours = Math.floor(diffTotalSeconds / 3600);
       const minutes = Math.floor((diffTotalSeconds % 3600) / 60);
       const seconds = diffTotalSeconds % 60;
-      // Format HH:MM:SS (with leading zeros)
       const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
       taskItem.innerHTML = `
@@ -49,17 +41,15 @@ document.addEventListener('DOMContentLoaded', () => {
           Last done: ${diffDays} day(s) ago (Time since last click:
           <span class="timer" data-index="${index}">${formattedTime}</span>)
         </p>
-        <p>Reminder interval: ${task.interval} day(s)</p>
+        <p>Reminder: Every ${task.interval} ${task.unit}(s)</p>
         <button data-index="${index}" class="didItAgain">Did It Again</button>
       `;
       taskListContainer.appendChild(taskItem);
     });
   }
 
-  // Function to update only the timer elements live
   function updateTimers() {
-    const timerElements = document.querySelectorAll('.timer');
-    timerElements.forEach(timerEl => {
+    document.querySelectorAll('.timer').forEach(timerEl => {
       const index = timerEl.getAttribute('data-index');
       const task = tasks[index];
       if (!task) return;
@@ -70,94 +60,66 @@ document.addEventListener('DOMContentLoaded', () => {
       const hours = Math.floor(diffTotalSeconds / 3600);
       const minutes = Math.floor((diffTotalSeconds % 3600) / 60);
       const seconds = diffTotalSeconds % 60;
-      const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-      timerEl.textContent = formattedTime;
+      timerEl.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     });
   }
 
-  // Function to send a notification for a given task
   function sendNotification(task) {
-  if (Notification.permission === "granted") {
-    // Determine the interval text based on unit
-    let intervalText;
-    if (task.unit === "minute") {
-      intervalText = `${task.interval * ((task.notifiedCount || 0) + 1)} minute(s)`;
+    if (Notification.permission === "granted") {
+      const intervalText = `${task.interval * ((task.notifiedCount || 0) + 1)} ${task.unit}(s)`;
+
+      new Notification("Time's Up!", {
+        body: `It's been ${intervalText} since you did: ${task.name}`,
+        icon: './icon-192x192.png'
+      });
     } else {
-      intervalText = `${task.interval * ((task.notifiedCount || 0) + 1)} day(s)`;
+      console.log("Notification permission not granted.");
     }
-
-    new Notification("Time's Up!", {
-      body: `It's been ${intervalText} since you did: ${task.name}`,
-      icon: './icon-192x192.png'
-    });
-  } else {
-    console.log("Notification permission not granted.");
   }
-}
 
-  // Function to check if tasks are overdue and send notifications
   function checkReminders() {
-  tasks.forEach((task, index) => {
-    let reminderMillis;
-    if (task.unit === 'minute') {
-      // Convert minutes to milliseconds
-      reminderMillis = task.interval * 60 * 1000;
-    } else {
-      // Assume 'day' unit (or extend with other units as needed)
-      reminderMillis = task.interval * 24 * 60 * 60 * 1000;
-    }
+    tasks.forEach((task, index) => {
+      let reminderMillis = task.unit === 'minute' ? task.interval * 60 * 1000 : task.interval * 24 * 60 * 60 * 1000;
 
-    const lastDone = new Date(task.lastDone);
-    const now = new Date();
-    const diffTime = now - lastDone;
+      const lastDone = new Date(task.lastDone);
+      const now = new Date();
+      const diffTime = now - lastDone;
+      const intervalsPassed = Math.floor(diffTime / reminderMillis);
+      const notifiedCount = task.notifiedCount || 0;
 
-    // Calculate how many full intervals have passed
-    const intervalsPassed = Math.floor(diffTime / reminderMillis);
-    const notifiedCount = task.notifiedCount || 0;
-
-    console.log(`Task "${task.name}" - intervalsPassed: ${intervalsPassed}, notifiedCount: ${notifiedCount}`);
-
-    if (intervalsPassed > notifiedCount) {
-      console.log(`Sending notification for task "${task.name}"`);
-      sendNotification(task);
-      // Update notifiedCount so that a notification is sent only once per interval passage
-      task.notifiedCount = intervalsPassed;
-      saveTasksToLocalStorage();
-    }
-  });
-}
-
-  // Handle new task creation
-saveTaskButton.addEventListener('click', () => {
-  const name = eventNameInput.value.trim();
-  if (!name) {
-    return alert('Please enter an event name.');
+      if (intervalsPassed > notifiedCount) {
+        sendNotification(task);
+        tasks[index].notifiedCount = intervalsPassed; // Ensure notification count updates
+        saveTasksToLocalStorage();
+      }
+    });
   }
 
-  // Get the selected option and its unit
-  const selectedOption = reminderIntervalSelect.options[reminderIntervalSelect.selectedIndex];
-  const unit = selectedOption.getAttribute('data-unit'); // "day" or "minute"
-  const interval = parseFloat(selectedOption.value); // use parseFloat in case you have fractional values in the future
+  saveTaskButton.addEventListener('click', () => {
+    const name = eventNameInput.value.trim();
+    if (!name) return alert('Please enter an event name.');
 
-  const task = {
-    name,
-    interval,
-    unit,
-    lastDone: new Date().toISOString(),
-    notifiedCount: 0  // Initialize notification counter
-  };
+    const selectedOption = reminderIntervalSelect.options[reminderIntervalSelect.selectedIndex];
+    const unit = selectedOption.getAttribute('data-unit'); // Ensure HTML has this!
+    const interval = parseFloat(selectedOption.value);
 
-  tasks.push(task);
-  saveTasksToLocalStorage();
-  renderTasks();
-  eventNameInput.value = ''; // Clear input field
-});
+    const task = {
+      name,
+      interval,
+      unit,
+      lastDone: new Date().toISOString(),
+      notifiedCount: 0
+    };
 
-  // Handle "Did It Again" button click to reset timer
+    tasks.push(task);
+    saveTasksToLocalStorage();
+    renderTasks();
+    eventNameInput.value = '';
+  });
+
   taskListContainer.addEventListener('click', (e) => {
     if (e.target.classList.contains('didItAgain')) {
       const index = e.target.getAttribute('data-index');
-      // Reset the lastDone and the notification counter
       tasks[index].lastDone = new Date().toISOString();
       tasks[index].notifiedCount = 0;
       saveTasksToLocalStorage();
@@ -165,12 +127,7 @@ saveTaskButton.addEventListener('click', () => {
     }
   });
 
-  // Initial render on page load
   renderTasks();
-
-  // Update the timer display every second
   setInterval(updateTimers, 1000);
-
-  // Check reminders every minute (adjust as needed)
-  setInterval(checkReminders, 5000);
+  setInterval(checkReminders, 10000); // Check reminders every minute (instead of 5 sec)
 });
