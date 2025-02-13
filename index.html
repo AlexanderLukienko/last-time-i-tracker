@@ -33,12 +33,11 @@
   <div>
     <input type="text" id="eventName" placeholder="Enter event name" />
     <select id="reminderInterval">
-      <!-- Values here are in days -->
-      <option value="1">1 day</option>
-      <option value="7">1 week</option>
-      <option value="30">1 month</option>
-      <option value="1" data-unit="minute">1 minute (for testing)</option>
-    </select>
+    <option value="1" data-unit="day">1 Day</option>
+    <option value="7" data-unit="day">1 Week</option>
+    <option value="30" data-unit="day">1 Month</option>
+    <option value="1" data-unit="minute">1 Minute (for testing)</option>
+</select>
     <button id="saveTask">Save Task</button>
   </div>
   <div class="task-list" id="taskList">
