@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+const saveTaskButton = document.getElementById("saveTask");
     console.log("Current Notification Permission:", Notification.permission);
 
     if (Notification.permission === "default") {
