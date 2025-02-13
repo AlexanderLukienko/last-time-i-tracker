@@ -1,5 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
 const saveTaskButton = document.getElementById("saveTask");
+const eventNameInput = document.getElementById("eventName");
+    const reminderIntervalSelect = document.getElementById("reminderInterval");
+    const taskListContainer = document.getElementById("taskList");
+
     console.log("Current Notification Permission:", Notification.permission);
 
     if (Notification.permission === "default") {
