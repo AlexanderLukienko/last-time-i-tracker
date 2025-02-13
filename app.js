@@ -1,8 +1,22 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const eventNameInput = document.getElementById('eventName');
-  const reminderIntervalSelect = document.getElementById('reminderInterval');
-  const saveTaskButton = document.getElementById('saveTask');
-  const taskListContainer = document.getElementById('taskList');
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("Current Notification Permission:", Notification.permission);
+
+    if (Notification.permission === "default") {
+        Notification.requestPermission().then(permission => {
+            console.log("Updated Permission:", permission);
+            if (permission === "granted") {
+                new Notification("Notifications enabled!", {
+                    body: "You will now receive reminders.",
+                    icon: './icon-192x192.png'
+                });
+            } else {
+                console.warn("User denied notifications.");
+            }
+        });
+    } else if (Notification.permission === "denied") {
+        console.error("Notifications are blocked! Enable them in browser settings.");
+    }
+});
 
   let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
 
